@@ -1,3 +1,6 @@
 #! /bin/bash
 
-echo "Hello World"
+# Esto es un comentario en BASH
+
+cat >> hola.txt
+
