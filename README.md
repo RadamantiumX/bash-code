@@ -835,6 +835,7 @@ echo "This's a debugged code"
 
 set +x
 ```
+De esa forma demarcamos las zonas de DEBBUG.
 
 
 
