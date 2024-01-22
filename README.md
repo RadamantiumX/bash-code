@@ -623,8 +623,221 @@ $ ./numbers.sh
 ```
 Podemos realizar esto con las demás operaciones matemáticas.
 
+***Los valores flotantes pueden no ser soportados por BASH, pero pueden ser utilizadas algunas paqueterías para lograrlo.***
+
 Continua...
 ***Ver: number.sh***
+
+
+## DECLARE
+
+Aca podemos ver una diferencia, entre crear una variable y utilizar ***declare*** para hacerlo. Esto último nos ofrece mas propiedades.
+
+```
+declare myvariable=22
+```
+Con esto podemos indicar que esta variable es de solo lectura, inmutar el tipo de dato que va a contener, etc... Es muy similar a una CONSTANTE en otros lenguajes de programacion.
+
+```
+declare -r pwdfile=/etc/passwwd
+```
+De esta forma "declaramos" que esta variable es solo de lectura "-r" ***(read)***
+
+```
+$ ./declare.sh
+/etc/passwwd
+./declare.sh: line 6: pwdfile: readonly variable
+```
+
+
+## ARRAYS
+
+Son listas de elementos. Es una forma sencilla de almacenar varios en uno solo.
+
+```
+names=( "John" "Mark" "James" "Mary" )
+```
+Esta la forma de representar un ARRAY de elementos en BASH, muy similar a las TUPLAS, pero sin la separacion de las comas.
+
+Para mostrarlos, solo necesitas indicar el indice dentro de los corchetas, o con el asterisco mostramos todos.
+```
+echo "Los nombres son: ${names[*]}"
+```
+```
+$ Los nombres son: John Mark James Mary
+```
+
+Continua... 
+***Ver: arrays.sh***
+
+
+## FUNCTIONS
+
+Como es sabido, las funciones en BASH cumplen la misma funcion que en otros lenguajes de programación, es una porcion del codigo del que podemos reutilizar.
+
+```
+function sayHello() {
+  echo "Hola mundo"
+}
+
+sayHello
+```
+
+Por lado definimos la función, y luego la llamamos. Podemos llamarla cuantas veces queramos. También, podemos pasarle argumentos a la función, para que lo utilce en alguna operacion matematica.
+
+Las variables que se crean dentro de una función, son variables globales:
+
+```
+function sayHello() {
+  message="Hola"
+  echo $message
+}
+
+sayHello
+
+echo $message
+```
+Eso quiere decir, que si queremos, la podemos llamar por fuera de la función. Incluso, se puede modificar el valor de la variable.
+
+```
+function sayHello() {
+  message="Hola"
+  echo $message
+}
+
+sayHello
+
+message="Hello"
+echo $message
+```
+La secuencia de ejecución en BASH, es linea por linea, y al no ser una variable constante se puede modificar.
+
+Ahora, si lo queremos es que esa variable no salga mas alla de la función, debemos hacer uso del termino "local". Con eso, vamos a decir q esa variable solo existe cuando llamemos a esa función. Si la intentamos llamar por fuera, no mostrara nada, será NULL.
+
+
+## DIRECTORIES
+
+Una parte importante de BASH SCRIPT, es trabajar con carpetas y archivos. En este ejemplo, vamos a comprobar si un archivo o una carpeta existe, o como podemos crearla desde un archivo SCRIPT. Es decir, va a confirmar (por nosotros), si una carpeta ya fue creada.
+
+```
+echo "Crea el nombre de tu carpeta:"
+read folder # Lee (lo que el usuario tipee) y guarda en "folder"
+
+# Comprueba si existe
+if [ -d $folder ] # La "-d" hace referencia a un directorio
+then
+   echo "El directorio '$folder' ya existe"
+else
+   echo "El directorio '$folder' no existe"
+fi  
+```
+
+Al pasarle un nombre por la terminal, chequea dentro de ests mismo directorio para comprobar su existencia.
+Esto solo funciona para carpetas, si queremos hacer lo mismo pero con archivos, solo tenemos que cambiar la "-d" por la "-f" (de "files").
+
+Además de verificar la existe, en este caso, de un archivo, tambien podemos modificarlo si existe.
+
+```
+echo "Nombre del archivo:"
+
+# Comprueba si existe
+if [ -f $file ] # La "-f" hace referencia a un archivo
+then
+   echo "Escribe el contenido" # Si existe que el usuario escriba text
+   read contenido # Leemos el texto en una variable
+   echo $contenido >> $file # La guardamos en un archivo
+else
+   echo "El archivo '$file' no existe"
+fi 
+```
+Recordemos que con el ">>" se modifica el archivo en cuestión, pero se mantienen las demás lineas ya existentes (si las hubiera).
+
+Junto con todo esto, le podemos decir que, nos muestre todas las lineas del archivo existente (si las tiene).
+
+```
+if [ -f $file ]
+then
+  # Obtenemos el contenido del archivo y lo recorremos
+  while IFS= read -r line
+  do
+    echo $line # Mostramos linea por linea en la consola
+  done < $file 
+else
+  echo "el archivo $file no existe"  
+fi  
+```
+Otra de los usos que le podemos dar es, de eliminar un archivo. Para eso usamos el comando "rm" (***remove***).
+
+```
+rm $file
+```
+
+## CURL
+
+Ya contamos con una serie de comandos para BASH, pero de ser necesario podemos instalar más. Y no tienen que ser necesariamente comandos para LINUX.
+Podemos usar el comando CURL (Client URL), que sirve para la transferencia de datos en multiples protocolos, pero siendo el HTTP el mas usado.
+
+```
+$ curl https://jsonplaceholder.typicode.com/users
+```
+De esa forma nos mostraría el resultado de esa petición a la URL.
+
+***curl.sh***
+```
+echo "Ingresa tu URL"
+read url # Leemos lo q ingresa el usuario
+
+curl $url
+```
+En este caso, llamamos a nuestro SCRIPT para que se ecargue de llamar a CURL. Incluso, podemos guardar en un archivo el resultado.
+
+```
+$ ./curl.sh
+Ingresa tu URL
+https://jsonplaceholder.typicode.com/users
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  5645    0  5645    0     0  64135      0 --:--:-- --:--:-- --:--:-- 64885
+```
+Como se ve, el comando se encargo d hacer la descarga de los datos y, también, ponerlos en un archivo JSON.
+
+No solo para este tipo de archivos se puede hacer, es viable para cualquier otra extensión.
+
+Para ver los HEADERS y la información que tiene cada peticion. Esto puede sernos util cuando creamos alguna lógica para restringir ciertas peticiones o archivos, como para dar un ejemplo.
+```
+curl -I $url
+```
+Datos de prueba:
+https://jsonplaceholder.typicode.com/
+https://freetestdata.com/
+
+## DEBUGGING
+
+Algo no menos importante, es saber como encontrar errores si nuestro programa empieza a crecer, o ya es bastante grande. 
+BASH, al ser un lenguaje interpretado, puede resultarnos muy util poder saber donde estan los errores.
+
+```
+$ bash -x concatenation.sh
+```
+Con ese comando podemos ejecutar un DEBUGGING en un SCRIPT. Tambien podemos agregarlo al ***shebang***.
+
+```
+#! /bin/bash/ -x
+```
+De ese modo, solo tenemos que especificar el nombre del archivo al cual queremos ***debuggear***.
+
+Dentro del codigo podemos establecer zonas donde queremos empezar a ***debuggear***.
+
+```
+set -x
+
+echo "This's a debugged code"
+
+set +x
+```
+
+
+
 
 
 
